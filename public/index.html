@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electronics Component Finder</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Electronics Component Finder</h1>
+      <nav>
+        <ul>
+          <li><a href="#" class="active">Search</a></li>
+          <li><a href="#" id="parts-list-link">Parts Lists</a></li>
+          <li><a href="#" id="datasheets-link">Datasheets</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section id="search-section" class="active-section">
+        <h2>Find Components</h2>
+        <div class="search-container">
+          <input type="text" id="search-input" placeholder="Enter component name, part number, or description...">
+          <button id="search-button">Search</button>
+        </div>
+        
+        <div class="filters">
+          <div class="filter-group">
+            <label for="category-filter">Category:</label>
+            <select id="category-filter">
+              <option value="">All Categories</option>
+              <option value="resistor">Resistors</option>
+              <option value="capacitor">Capacitors</option>
+              <option value="ic">Integrated Circuits</option>
+              <option value="transistor">Transistors</option>
+              <option value="connector">Connectors</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label for="shop-filter">Shop:</label>
+            <select id="shop-filter">
+              <option value="">All Shops</option>
+              <option value="elfa">Elfa Distrelec</option>
+              <option value="electrokit">Electrokit</option>
+              <option value="mouser">Mouser</option>
+              <option value="farnell">Farnell</option>
+              <option value="rs">RS Components</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label for="stock-filter">Stock:</label>
+            <select id="stock-filter">
+              <option value="">Any</option>
+              <option value="in-stock">In Stock Only</option>
+            </select>
+          </div>
+        </div>
+        
+        <div id="results-container">
+          <p class="placeholder-message">Search for components to see results</p>
+        </div>
+      </section>
+
+      <section id="parts-list-section" class="hidden-section">
+        <h2>Parts Lists</h2>
+        <div class="parts-list-controls">
+          <button id="new-list-button">Create New List</button>
+        </div>
+        <div id="parts-lists-container">
+          <p class="placeholder-message">No parts lists yet</p>
+        </div>
+      </section>
+
+      <section id="datasheets-section" class="hidden-section">
+        <h2>Datasheets</h2>
+        <div class="datasheets-search">
+          <input type="text" id="datasheet-search-input" placeholder="Search datasheets...">
+          <button id="datasheet-search-button">Search</button>
+        </div>
+        <div id="datasheets-container">
+          <p class="placeholder-message">Search for datasheets</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Electronics Component Finder</p>
+      <p>Data last updated: <span id="last-update-time">Never</span></p>
+    </div>
+  </footer>
+
+  <!-- Debug Info -->
+  <div id="debug-info" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd; display: none;">
+    <h3>Debug Information</h3>
+    <div id="debug-content"></div>
+  </div>
+
+  <!-- Templates for dynamic content -->
+  <template id="component-result-template">
+    <div class="result-card">
+      <div class="result-header">
+        <h3 class="component-name"></h3>
+        <span class="component-manufacturer"></span>
+      </div>
+      <div class="result-body">
+        <p class="component-description"></p>
+        <div class="shop-listings"></div>
+      </div>
+      <div class="result-footer">
+        <button class="add-to-list-button">Add to List</button>
+        <button class="view-datasheet-button">View Datasheet</button>
+        <button class="find-alternatives-button">Find Alternatives</button>
+      </div>
+    </div>
+  </template>
+
+  <template id="shop-listing-template">
+    <div class="shop-listing">
+      <div class="shop-info">
+        <span class="shop-name"></span>
+        <span class="last-updated"></span>
+      </div>
+      <div class="price-info">
+        <span class="price"></span>
+        <span class="stock-status"></span>
+      </div>
+      <a class="shop-link" target="_blank">View in Shop</a>
+    </div>
+  </template>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

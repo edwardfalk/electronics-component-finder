@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>JavaScript Test Page</h1>
+  <p>This page tests if JavaScript is working correctly.</p>
+  
+  <button id="test-button">Run Test</button>
+  
+  <div id="result">Results will appear here...</div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded');
+      
+      const testButton = document.getElementById('test-button');
+      const resultDiv = document.getElementById('result');
+      
+      testButton.addEventListener('click', () => {
+        console.log('Button clicked');
+        
+        // Test 1: Basic functionality
+        resultDiv.innerHTML = '<h3>Test Results:</h3>';
+        resultDiv.innerHTML += '<p>✅ Basic JavaScript is working</p>';
+        
+        // Test 2: Async functionality
+        resultDiv.innerHTML += '<p>Testing async functionality...</p>';
+        setTimeout(() => {
+          resultDiv.innerHTML += '<p>✅ Async functionality is working</p>';
+          
+          // Test 3: Create a mock component
+          const mockComponent = {
+            name: 'Test Component',
+            manufacturer: 'Test Manufacturer',
+            description: 'This is a test component',
+            shops: [
+              {
+                name: 'Test Shop',
+                price: 10.99,
+                currency: 'SEK',
+                inStock: true
+              }
+            ]
+          };
+          
+          resultDiv.innerHTML += '<p>✅ Object creation is working</p>';
+          resultDiv.innerHTML += '<p>✅ All tests passed!</p>';
+          resultDiv.innerHTML += '<pre>' + JSON.stringify(mockComponent, null, 2) + '</pre>';
+        }, 500);
+      });
+    });
+  </script>
+</body>
+</html>
