@@ -2,6 +2,8 @@
 
 [![Deployment Status](https://github.com/edwardfalk/electronics-component-finder/actions/workflows/deploy.yml/badge.svg)](https://github.com/edwardfalk/electronics-component-finder/actions/workflows/deploy.yml)
 
+> Deployed at: http://172.232.134.214
+
 A web application to find and compare electronic components across multiple online shops, with a focus on Swedish and European retailers.
 
 ## Features
