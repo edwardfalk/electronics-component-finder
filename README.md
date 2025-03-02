@@ -78,73 +78,81 @@ electronics-component-finder/
    npm start
    ```
 
-## Deployment to Linode
+## Automated Deployment to Linode
 
-### Setting Up a Linode Server
+This project is set up with GitHub Actions for continuous deployment to Linode.
 
-1. Create a Nanode 1GB instance on Linode
-2. Choose Ubuntu LTS as the operating system
-3. Set up SSH access
+### Initial Server Setup
 
-### Server Configuration
+The server has been set up on Linode with the following configuration:
 
-1. Update the system:
-   ```
-   sudo apt update && sudo apt upgrade -y
-   ```
+1. Linode instance: Nanode 1GB
+2. Operating system: Ubuntu LTS
+3. IP address: 172.232.134.214
+4. Server setup completed with:
+   - Node.js and npm
+   - PM2 for process management
+   - Nginx as a reverse proxy
+   - SQLite for database storage
 
-2. Install Node.js:
-   ```
-   curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-   sudo apt-get install -y nodejs
-   ```
+For future reference, the server setup script is available at `scripts/setup-server.sh`.
 
-3. Install PM2 for process management:
-   ```
-   sudo npm install -g pm2
-   ```
+### GitHub Actions Deployment
 
-4. Install Nginx:
-   ```
-   sudo apt install nginx -y
-   ```
+The project is configured with GitHub Actions for continuous deployment to Linode. The following GitHub Secrets have been set up:
 
-5. Configure Nginx as a reverse proxy:
-   ```
-   sudo nano /etc/nginx/sites-available/component-finder
-   ```
+- `SSH_PRIVATE_KEY`: Private SSH key for accessing the Linode server
+- `SSH_KNOWN_HOSTS`: SSH known hosts information for the Linode server
+- `SSH_HOST`: Linode server IP address (172.232.134.214)
+- `SSH_USER`: SSH username (root)
+- `PORT`: Application port (3000)
+- `DB_PATH`: Path to the SQLite database (/root/app/data/component_finder.sqlite)
 
-   Add the following configuration:
-   ```
-   server {
-       listen 80;
-       server_name your-domain.com;
+To deploy changes, simply push to the `master` branch. The GitHub Actions workflow will automatically build and deploy the application to the Linode server.
 
-       location / {
-           proxy_pass http://localhost:3000;
-           proxy_http_version 1.1;
-           proxy_set_header Upgrade $http_upgrade;
-           proxy_set_header Connection 'upgrade';
-           proxy_set_header Host $host;
-           proxy_cache_bypass $http_upgrade;
-       }
-   }
-   ```
+For detailed information about the deployment process, see the following files:
+- `.github/workflows/deploy.yml`: GitHub Actions workflow configuration
+- `ecosystem.config.js`: PM2 process management configuration
+- `scripts/setup-server.sh`: Server setup script
+- `scripts/backup-db.sh`: Database backup script
+- `github-actions-setup.md`: Detailed deployment guide
 
-6. Enable the site:
-   ```
-   sudo ln -s /etc/nginx/sites-available/component-finder /etc/nginx/sites-enabled/
-   sudo nginx -t
-   sudo systemctl restart nginx
-   ```
+### How It Works
 
-### Deploying the Application
+1. When you push to the `master` branch, GitHub Actions will:
+   - Install dependencies
+   - Build the TypeScript code
+   - Create a deployment package
+   - Copy the package to your Linode server
+   - Install production dependencies
+   - Start/restart the application with PM2
 
-1. Clone the repository on your Linode server
-2. Install dependencies: `npm install`
-3. Build the application: `npm run build`
-4. Start with PM2: `pm2 start dist/index.js --name component-finder`
-5. Set up PM2 to start on boot: `pm2 startup` and follow the instructions
+2. The deployment configuration uses:
+   - PM2 for process management (see `ecosystem.config.js`)
+   - Nginx as a reverse proxy
+   - Automatic restarts if the application crashes
+
+### Manual Deployment
+
+If you need to deploy manually:
+
+1. Build the application locally: `npm run build`
+2. Create a deployment package:
+   ```
+   tar -czf deploy.tar.gz dist/ public/ package.json package-lock.json .env data/ scripts/
+   ```
+3. Copy the package to your server:
+   ```
+   scp deploy.tar.gz user@your-linode-ip:~/app/
+   ```
+4. SSH into your server and deploy:
+   ```
+   ssh user@your-linode-ip
+   cd ~/app
+   tar -xzf deploy.tar.gz
+   npm ci --production
+   pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
+   ```
 
 ## API Integration
 
