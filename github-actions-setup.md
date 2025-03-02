@@ -10,24 +10,38 @@ We've already generated the SSH key pair:
 
 ## 2. Add Public Key to Linode Server
 
-SSH into your Linode server:
+SSH into your Linode server as root (as shown in your Linode dashboard):
+
+```bash
+ssh root@172.232.134.214
+```
+
+Create a deployment user (if not already done):
+
+```bash
+# Check if the falk user already exists
+id falk || adduser falk
+# Add sudo privileges
+usermod -aG sudo falk
+```
+
+Set up SSH for the deployment user:
+
+```bash
+# Create .ssh directory for the falk user
+mkdir -p /home/falk/.ssh
+chmod 700 /home/falk/.ssh
+
+# Add the public key to authorized_keys
+echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMm/YnUg8RpabOTA8GPDWvd5NR8nVxFLQp93W81LuP2d github-actions-deploy" >> /home/falk/.ssh/authorized_keys
+chmod 600 /home/falk/.ssh/authorized_keys
+chown -R falk:falk /home/falk/.ssh
+```
+
+Test SSH access with the falk user:
 
 ```bash
 ssh falk@172.232.134.214
-```
-
-Create the .ssh directory if it doesn't exist:
-
-```bash
-mkdir -p ~/.ssh
-chmod 700 ~/.ssh
-```
-
-Add the public key to the authorized_keys file:
-
-```bash
-echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMm/YnUg8RpabOTA8GPDWvd5NR8nVxFLQp93W81LuP2d github-actions-deploy" >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
 ```
 
 ## 3. Set Up GitHub Secrets
@@ -55,18 +69,20 @@ NR8nVxFLQp93W81LuP2dAAAAFWdpdGh1Yi1hY3Rpb25zLWRlcGxveQ==
 
 3. `SSH_HOST`: `172.232.134.214`
 
-4. `SSH_USER`: `falk`
+4. `SSH_USER`: `root` (or `falk` if you prefer to use the non-root user)
 
 5. `PORT`: `3000`
 
-6. `DB_PATH`: `/home/falk/app/data/component_finder.sqlite`
+6. `DB_PATH`: `/root/app/data/component_finder.sqlite` (if using root) or `/home/falk/app/data/component_finder.sqlite` (if using falk)
 
 ## 4. Prepare the Server
 
-SSH into your Linode server:
+SSH into your Linode server (using the user you chose for SSH_USER):
 
 ```bash
-ssh falk@172.232.134.214
+ssh root@172.232.134.214
+# Or if using the falk user
+# ssh falk@172.232.134.214
 ```
 
 Create the application directory structure:
@@ -80,13 +96,18 @@ mkdir -p ~/app/data
 Copy the server setup script to your Linode:
 
 ```bash
-scp scripts/setup-server.sh falk@172.232.134.214:~/
+scp scripts/setup-server.sh root@172.232.134.214:~/
+# Or if using the falk user
+# scp scripts/setup-server.sh falk@172.232.134.214:~/
 ```
 
 SSH into your server and run the setup script:
 
 ```bash
-ssh falk@172.232.134.214
+ssh root@172.232.134.214
+# Or if using the falk user
+# ssh falk@172.232.134.214
+
 chmod +x ~/setup-server.sh
 sudo ~/setup-server.sh
 ```
