@@ -1,5 +1,7 @@
 # Electronics Component Finder
 
+[![Deployment Status](https://github.com/edwardfalk/electronics-component-finder/actions/workflows/deploy.yml/badge.svg)](https://github.com/edwardfalk/electronics-component-finder/actions/workflows/deploy.yml)
+
 A web application to find and compare electronic components across multiple online shops, with a focus on Swedish and European retailers.
 
 ## Features
