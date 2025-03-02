@@ -40,7 +40,7 @@ jobs:
     - name: Deploy to Linode
       run: |
         # Create deployment package
-        tar -czf deploy.tar.gz dist/ public/ package.json package-lock.json .env data/ scripts/
+        tar -czf deploy.tar.gz dist/ public/ package.json package-lock.json .env data/ scripts/ ecosystem.config.js
 
         # Copy files to server
         scp deploy.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/app/
