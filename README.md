@@ -3,6 +3,7 @@
 [![Deployment Status](https://github.com/edwardfalk/electronics-component-finder/actions/workflows/deploy.yml/badge.svg)](https://github.com/edwardfalk/electronics-component-finder/actions/workflows/deploy.yml)
 
 > Deployed at: http://172.232.134.214
+> Last test deployment: March 6, 2024
 
 A web application to find and compare electronic components across multiple online shops, with a focus on Swedish and European retailers.
 
@@ -13,6 +14,7 @@ A web application to find and compare electronic components across multiple onli
 - Find alternative components when items are out of stock
 - Optimize shopping carts for the best combination of price and availability
 - Store and access component datasheets
+- Centralized database on Linode for component data
 
 ## Project Structure
 
@@ -23,12 +25,19 @@ electronics-component-finder/
 │   ├── models/               # Database models
 │   ├── controllers/          # Request handlers
 │   ├── services/             # Business logic
+│   ├── scripts/              # Database scripts
+│   │   ├── db-init.ts        # Database initialization
+│   │   └── migrate-data.ts   # Data migration
 │   └── index.ts              # Main application file
 ├── public/                   # Frontend assets
 │   ├── js/                   # Frontend JavaScript
 │   ├── css/                  # Stylesheets
 │   ├── datasheets/           # Stored datasheets
 │   └── index.html            # Main HTML page
+├── scripts/                  # Shell scripts
+│   ├── schema.sql            # Database schema
+│   ├── backup-db.sh          # Database backup script
+│   └── setup-server.sh       # Server setup script
 ├── data/                     # Database and other data files
 ├── .env                      # Environment variables (API keys, etc.)
 ├── .gitignore                # Git ignore file
@@ -41,8 +50,9 @@ electronics-component-finder/
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v18 or higher)
 - npm or yarn
+- SQLite3
 - A Linode account (for deployment)
 
 ### Local Development
@@ -63,12 +73,18 @@ electronics-component-finder/
    cp .env.example .env
    ```
 
-4. Start the development server:
+4. Initialize the database:
+   ```
+   npm run db:init
+   npm run db:migrate
+   ```
+
+5. Start the development server:
    ```
    npm run dev
    ```
 
-5. Open your browser and navigate to `http://localhost:3000`
+6. Open your browser and navigate to `http://localhost:3000`
 
 ### Building for Production
 
@@ -81,6 +97,14 @@ electronics-component-finder/
    ```
    npm start
    ```
+
+### Database Management
+
+The application uses SQLite for data storage. The following scripts are available for database management:
+
+- Initialize the database: `npm run db:init`
+- Migrate data: `npm run db:migrate`
+- Backup the database: `npm run db:backup`
 
 ## Automated Deployment to Linode
 
