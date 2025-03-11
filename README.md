@@ -178,63 +178,23 @@ The production build will be available in the `dist` directory.
 
 ## Deployment
 
-### Automated Deployment to Linode
+### Server Setup Requirements
 
-This project is set up with GitHub Actions for continuous deployment to Linode.
+The application can be deployed on any server meeting these requirements:
 
-#### Initial Server Setup
+1. Hardware Requirements:
+   - Minimum 1GB RAM
+   - 1 CPU core
+   - 20GB storage
 
-The server has been set up on Linode with the following configuration:
+2. Software Requirements:
+   - Node.js 18 or higher
+   - npm 9 or higher
+   - SQLite3
+   - Nginx (recommended for reverse proxy)
+   - PM2 (recommended for process management)
 
-1. Linode instance: Nanode 1GB
-2. Operating system: Ubuntu LTS
-3. IP address: 172.232.134.214
-4. Server setup completed with:
-   - Node.js and npm
-   - PM2 for process management
-   - Nginx as a reverse proxy
-   - SQLite for database storage
-
-For future reference, the server setup script is available at `scripts/setup-server.sh`.
-
-#### GitHub Actions Deployment
-
-The project is configured with GitHub Actions for continuous deployment to Linode. The following GitHub Secrets have been set up:
-
-- `SSH_PRIVATE_KEY`: Private SSH key for accessing the Linode server
-- `SSH_KNOWN_HOSTS`: SSH known hosts information for the Linode server
-- `SSH_HOST`: Linode server IP address (172.232.134.214)
-- `SSH_USER`: SSH username (root)
-- `PORT`: Application port (3000)
-- `DB_PATH`: Path to the SQLite database (/root/app/data/component_finder.sqlite)
-
-To deploy changes, simply push to the `master` branch. The GitHub Actions workflow will automatically build and deploy the application to the Linode server.
-
-For detailed information about the deployment process, see the following files:
-- `.github/workflows/deploy.yml`: GitHub Actions workflow configuration
-- `ecosystem.config.js`: PM2 process management configuration
-- `scripts/setup-server.sh`: Server setup script
-- `scripts/backup-db.sh`: Database backup script
-- `github-actions-setup.md`: Detailed deployment guide
-
-#### How It Works
-
-1. When you push to the `master` branch, GitHub Actions will:
-   - Install dependencies
-   - Build the TypeScript code
-   - Create a deployment package
-   - Copy the package to your Linode server
-   - Install production dependencies
-   - Start/restart the application with PM2
-
-2. The deployment configuration uses:
-   - PM2 for process management (see `ecosystem.config.js`)
-   - Nginx as a reverse proxy
-   - Automatic restarts if the application crashes
-
-#### Manual Deployment
-
-If you need to deploy manually:
+### Manual Deployment
 
 1. Build the application locally:
    ```bash
@@ -248,25 +208,81 @@ If you need to deploy manually:
 
 3. Copy the package to your server:
    ```bash
-   scp deploy.tar.gz user@your-linode-ip:~/app/
+   scp deploy.tar.gz user@your-server-ip:~/app/
    ```
 
 4. SSH into your server and deploy:
    ```bash
-   ssh user@your-linode-ip
+   ssh user@your-server-ip
    cd ~/app
    tar -xzf deploy.tar.gz
    npm ci --production
    pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
    ```
 
-#### Database Management
+### Database Management
 
 The application uses SQLite for data storage. The following scripts are available for database management:
 
 - Initialize the database: `npm run db:init`
 - Migrate data: `npm run db:migrate`
 - Backup the database: `npm run db:backup`
+
+### Server Configuration
+
+1. Install required software:
+   ```bash
+   # Update package list
+   sudo apt update
+   
+   # Install Node.js and npm
+   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+   sudo apt install -y nodejs
+   
+   # Install PM2 globally
+   sudo npm install -g pm2
+   
+   # Install Nginx
+   sudo apt install -y nginx
+   
+   # Install SQLite
+   sudo apt install -y sqlite3
+   ```
+
+2. Configure Nginx as reverse proxy:
+   ```nginx
+   # /etc/nginx/sites-available/electronic-components-finder
+   server {
+       listen 80;
+       server_name your-domain.com;
+
+       location / {
+           proxy_pass http://localhost:3000;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
+           proxy_set_header Host $host;
+           proxy_cache_bypass $http_upgrade;
+       }
+   }
+   ```
+
+3. Enable the Nginx site:
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/electronic-components-finder /etc/nginx/sites-enabled/
+   sudo nginx -t
+   sudo systemctl restart nginx
+   ```
+
+4. Set up PM2 for process management:
+   ```bash
+   # Start the application
+   pm2 start ecosystem.config.js
+   
+   # Enable startup script
+   pm2 startup
+   pm2 save
+   ```
 
 ## Contributing
 
