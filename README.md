@@ -178,21 +178,22 @@ The production build will be available in the `dist` directory.
 
 ## Deployment
 
-### Server Setup Requirements
+### Current Server Configuration
 
-The application can be deployed on any server meeting these requirements:
+The application is currently deployed on a Linode server with the following configuration:
 
-1. Hardware Requirements:
-   - Minimum 1GB RAM
-   - 1 CPU core
-   - 20GB storage
+1. Server Details:
+   - Linode instance: Nanode 1GB
+   - Operating system: Ubuntu LTS
+   - IP address: 172.232.134.214
+   - Port: 3000
 
-2. Software Requirements:
-   - Node.js 18 or higher
-   - npm 9 or higher
-   - SQLite3
-   - Nginx (recommended for reverse proxy)
-   - PM2 (recommended for process management)
+2. Installed Software:
+   - Node.js and npm
+   - PM2 for process management
+   - Nginx as reverse proxy
+   - SQLite for database storage
+   - Database path: /root/app/data/component_finder.sqlite
 
 ### Manual Deployment
 
@@ -206,14 +207,14 @@ The application can be deployed on any server meeting these requirements:
    tar -czf deploy.tar.gz dist/ public/ package.json package-lock.json .env data/ scripts/
    ```
 
-3. Copy the package to your server:
+3. Copy the package to the Linode server:
    ```bash
-   scp deploy.tar.gz user@your-server-ip:~/app/
+   scp deploy.tar.gz root@172.232.134.214:~/app/
    ```
 
-4. SSH into your server and deploy:
+4. SSH into the server and deploy:
    ```bash
-   ssh user@your-server-ip
+   ssh root@172.232.134.214
    cd ~/app
    tar -xzf deploy.tar.gz
    npm ci --production
@@ -228,7 +229,9 @@ The application uses SQLite for data storage. The following scripts are availabl
 - Migrate data: `npm run db:migrate`
 - Backup the database: `npm run db:backup`
 
-### Server Configuration
+### Server Configuration Reference
+
+If you need to set up a new server or reinstall software, here are the configuration steps:
 
 1. Install required software:
    ```bash
@@ -254,7 +257,7 @@ The application uses SQLite for data storage. The following scripts are availabl
    # /etc/nginx/sites-available/electronic-components-finder
    server {
        listen 80;
-       server_name your-domain.com;
+       server_name 172.232.134.214;
 
        location / {
            proxy_pass http://localhost:3000;
