@@ -55,22 +55,30 @@ A modern web application for finding and comparing electronic components across 
 
 ```
 electronics-component-finder/
-├── src/                      # Source code
+├── src/                      # Frontend source code
 │   ├── api/                  # API client functions
 │   ├── components/           # Reusable React components
-│   ├── controllers/          # Request handlers
-│   ├── lib/                  # Core library code
-│   │   ├── base/            # Base classes
-│   │   └── scrapers/        # Scraper implementations
-│   ├── models/              # Database models
 │   ├── pages/               # Page components
-│   ├── routes/              # API routes
-│   ├── services/            # Business logic
-│   ├── types/               # TypeScript interfaces
-│   ├── utils/               # Utility functions
-│   ├── vendors/             # Vendor-specific implementations
+│   ├── types/               # Frontend TypeScript interfaces
+│   ├── utils/               # Frontend utility functions
 │   ├── App.tsx              # Main application component
-│   └── main.tsx             # Application entry point
+│   └── main.tsx             # Frontend entry point
+├── backend/                  # Backend application
+│   ├── src/                 # Backend source code
+│   │   ├── controllers/     # Request handlers
+│   │   ├── lib/            # Core library code
+│   │   │   ├── base/       # Base classes
+│   │   │   └── scrapers/   # Scraper implementations
+│   │   ├── models/         # Database models
+│   │   ├── routes/         # API routes
+│   │   ├── services/       # Business logic
+│   │   ├── types/         # Backend TypeScript interfaces
+│   │   ├── utils/         # Backend utility functions
+│   │   ├── vendors/       # Vendor-specific implementations
+│   │   └── server.ts      # Backend entry point
+│   ├── tests/             # Backend tests
+│   ├── tsconfig.json      # Backend TypeScript config
+│   └── jest.config.js     # Backend test config
 ├── public/                   # Frontend assets
 │   ├── js/                  # Frontend JavaScript
 │   ├── css/                 # Stylesheets
@@ -84,7 +92,7 @@ electronics-component-finder/
 ├── .env                     # Environment variables (API keys, etc.)
 ├── .gitignore              # Git ignore file
 ├── package.json            # Node.js package configuration
-├── tsconfig.json           # TypeScript configuration
+├── tsconfig.json           # Frontend TypeScript configuration
 └── README.md               # Project documentation
 ```
 
@@ -104,7 +112,7 @@ electronics-component-finder/
    cd electronics-component-finder
    ```
 
-2. Install dependencies:
+2. Install dependencies for both frontend and backend:
    ```bash
    npm install
    ```
@@ -112,7 +120,8 @@ electronics-component-finder/
 3. Configure environment variables:
    ```bash
    cp .env.example .env
-   # Edit .env with your configuration
+   cp backend/.env.example backend/.env
+   # Edit both .env files with your configuration
    ```
 
 4. Initialize the database:
@@ -120,12 +129,16 @@ electronics-component-finder/
    npm run db:init
    ```
 
-5. Start the development server:
+5. Start the development servers:
    ```bash
+   # In one terminal:
    npm run dev
+   
+   # In another terminal:
+   npm run dev:backend
    ```
 
-The application will be available at `http://localhost:5173`.
+The frontend will be available at `http://localhost:5173` and the backend API at `http://localhost:3000`.
 
 ## Development
 
@@ -171,10 +184,15 @@ npm test
 ### Building for Production
 
 ```bash
-npm run build
+# Build everything (frontend and backend):
+npm run build:all
+
+# Or build separately:
+npm run build        # Frontend
+npm run build:backend # Backend
 ```
 
-The production build will be available in the `dist` directory.
+The production builds will be available in the `dist` and `backend/dist` directories.
 
 ## Deployment
 
