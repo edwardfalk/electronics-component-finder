@@ -214,7 +214,7 @@ The application is currently deployed on a Linode server with the following conf
 
 4. SSH into the server and deploy:
    ```bash
-   ssh root@172.232.134.214
+   ssh falk@172.232.134.214
    cd ~/app
    tar -xzf deploy.tar.gz
    npm ci --production
