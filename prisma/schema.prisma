@@ -1,0 +1,48 @@
+// This is your Prisma schema file
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Component {
+  id            String   @id @default(uuid())
+  partNumber    String
+  name          String
+  description   String?
+  category      String
+  vendor        String
+  price         Float
+  currency      String   @default("SEK")
+  inStock       Boolean  @default(false)
+  url           String?
+  imageUrl      String?
+  datasheet     String?
+  manufacturer  String?
+  specifications Json?
+  lastUpdated   DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  @@unique([partNumber, vendor])
+  @@index([category])
+  @@index([vendor])
+  @@index([manufacturer])
+}
+
+model ScrapingJob {
+  id          String    @id @default(uuid())
+  vendor      String
+  query       String
+  status      String    // PENDING, RUNNING, COMPLETED, FAILED
+  startedAt   DateTime?
+  completedAt DateTime?
+  error       String?
+  results     Json?
+  createdAt   DateTime  @default(now())
+
+  @@index([vendor])
+  @@index([status])
+} 
