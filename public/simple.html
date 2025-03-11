@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Component Finder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .search-container {
+      display: flex;
+      margin-bottom: 20px;
+    }
+    #search-input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+    }
+    #search-button {
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .result-card {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .shop-listing {
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+    .in-stock {
+      color: green;
+    }
+    .out-of-stock {
+      color: red;
+    }
+    #debug-info {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+    }
+    .quick-search {
+      margin-bottom: 20px;
+    }
+    .quick-search button {
+      margin-right: 10px;
+      padding: 8px 12px;
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .quick-search button:hover {
+      background-color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simple Component Finder</h1>
+  
+  <div class="search-container">
+    <input type="text" id="search-input" placeholder="Enter component name (e.g., resistor, transistor)">
+    <button id="search-button">Search</button>
+  </div>
+  
+  <div class="quick-search">
+    <p>Quick search:</p>
+    <button id="search-resistor">Search for Resistors</button>
+    <button id="search-transistor">Search for Transistors</button>
+    <button id="search-regulator">Search for Regulators</button>
+  </div>
+  
+  <div id="results-container">
+    <p>Search for components to see results</p>
+  </div>
+  
+  <div id="debug-info">
+    <h3>Debug Information</h3>
+    <div id="debug-content"></div>
+  </div>
+  
+  <script>
+    // Global variables
+    let searchInput;
+    let resultsContainer;
+    
+    // Debug helper
+    function debug(message, data = null) {
+      console.log(message, data || '');
+      const debugContent = document.getElementById('debug-content');
+      const timestamp = new Date().toLocaleTimeString();
+      const dataStr = data ? (typeof data === 'object' ? JSON.stringify(data, null, 2) : data) : '';
+      debugContent.innerHTML += `<p><strong>${timestamp}:</strong> ${message} ${dataStr ? '<pre>' + dataStr + '</pre>' : ''}</p>`;
+    }
+    
+    // Mock data function
+    function getMockResults(searchTerm) {
+      const mockComponents = [
+        {
+          id: 1,
+          name: 'LM317T',
+          manufacturer: 'Texas Instruments',
+          description: 'Adjustable voltage regulator, 1.2V to 37V output, 1.5A',
+          category: 'ic',
+          shops: [
+            {
+              name: 'Elfa Distrelec',
+              price: 12.50,
+              currency: 'SEK',
+              inStock: true,
+              stockStatus: 'In Stock (50+)',
+              lastUpdated: '2025-03-01 12:30',
+              url: 'https://www.elfa.se'
+            },
+            {
+              name: 'Electrokit',
+              price: 10.90,
+              currency: 'SEK',
+              inStock: true,
+              stockStatus: 'In Stock (23)',
+              lastUpdated: '2025-03-01 14:15',
+              url: 'https://www.electrokit.com'
+            }
+          ]
+        },
+        {
+          id: 2,
+          name: '2N2222A',
+          manufacturer: 'ON Semiconductor',
+          description: 'NPN general purpose transistor, 40V, 800mA',
+          category: 'transistor',
+          shops: [
+            {
+              name: 'Elfa Distrelec',
+              price: 3.20,
+              currency: 'SEK',
+              inStock: true,
+              stockStatus: 'In Stock (100+)',
+              lastUpdated: '2025-03-01 12:30',
+              url: 'https://www.elfa.se'
+            }
+          ]
+        },
+        {
+          id: 3,
+          name: '10k Resistor',
+          manufacturer: 'Yageo',
+          description: '10k Ohm resistor, 1/4W, 5% tolerance, through-hole',
+          category: 'resistor',
+          shops: [
+            {
+              name: 'Electrokit',
+              price: 0.90,
+              currency: 'SEK',
+              inStock: true,
+              stockStatus: 'In Stock (1000+)',
+              lastUpdated: '2025-03-01 14:15',
+              url: 'https://www.electrokit.com'
+            }
+          ]
+        }
+      ];
+      
+      // Filter based on search term
+      return mockComponents.filter(component => {
+        return (
+          component.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          component.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          component.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          component.category.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      });
+    }
+    
+    // Display results function
+    function displayResults(results) {
+      debug('Displaying results');
+      
+      if (!results || results.length === 0) {
+        resultsContainer.innerHTML = '<p>No components found matching your search criteria</p>';
+        return;
+      }
+      
+      // Clear previous results
+      resultsContainer.innerHTML = '';
+      
+      // Create result cards
+      results.forEach(component => {
+        debug(`Creating card for ${component.name}`);
+        
+        // Create component card
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        
+        // Add component details
+        card.innerHTML = `
+          <h2>${component.name}</h2>
+          <p><strong>Manufacturer:</strong> ${component.manufacturer}</p>
+          <p>${component.description}</p>
+          <h3>Available at:</h3>
+        `;
+        
+        // Add shop listings
+        component.shops.forEach(shop => {
+          const shopDiv = document.createElement('div');
+          shopDiv.className = 'shop-listing';
+          
+          const stockClass = shop.inStock ? 'in-stock' : 'out-of-stock';
+          
+          shopDiv.innerHTML = `
+            <p><strong>${shop.name}</strong> - ${shop.price} ${shop.currency}</p>
+            <p class="${stockClass}">${shop.stockStatus}</p>
+            <p><small>Updated: ${shop.lastUpdated}</small></p>
+            <a href="${shop.url}" target="_blank">View in Shop</a>
+          `;
+          
+          card.appendChild(shopDiv);
+        });
+        
+        // Add to results container
+        resultsContainer.appendChild(card);
+      });
+    }
+    
+    // Perform search function
+    function performSearch() {
+      const searchTerm = searchInput.value.trim();
+      debug('Performing search', { searchTerm });
+      
+      if (!searchTerm) {
+        debug('Empty search term, aborting search');
+        return;
+      }
+      
+      // Show loading message
+      resultsContainer.innerHTML = '<p>Searching...</p>';
+      
+      // Simulate API delay
+      setTimeout(() => {
+        // Get mock results
+        const results = getMockResults(searchTerm);
+        debug('Search results', results);
+        
+        // Display results
+        displayResults(results);
+      }, 500);
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      debug('Application initialized');
+      
+      // Initialize global variables
+      searchInput = document.getElementById('search-input');
+      resultsContainer = document.getElementById('results-container');
+      const searchButton = document.getElementById('search-button');
+      
+      // Quick search buttons
+      document.getElementById('search-resistor').addEventListener('click', () => {
+        searchInput.value = 'resistor';
+        performSearch();
+      });
+      
+      document.getElementById('search-transistor').addEventListener('click', () => {
+        searchInput.value = 'transistor';
+        performSearch();
+      });
+      
+      document.getElementById('search-regulator').addEventListener('click', () => {
+        searchInput.value = 'regulator';
+        performSearch();
+      });
+      
+      // Search button click handler
+      searchButton.addEventListener('click', performSearch);
+      
+      // Enter key handler
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,6 +1,11 @@
 # Electronic Components Finder
 
-A modern web application for finding and comparing electronic components across multiple online shops. The application provides a unified interface to search for components, compare prices, manage parts lists, and access datasheets.
+[![Deployment Status](https://github.com/edwardfalk/electronics-component-finder/actions/workflows/deploy.yml/badge.svg)](https://github.com/edwardfalk/electronics-component-finder/actions/workflows/deploy.yml)
+
+> Deployed at: http://172.232.134.214
+> Last test deployment: March 6, 2024
+
+A modern web application for finding and comparing electronic components across multiple online shops, with a focus on Swedish and European retailers. The application provides a unified interface to search for components, compare prices, manage parts lists, and access datasheets.
 
 ## Features
 
@@ -9,6 +14,8 @@ A modern web application for finding and comparing electronic components across 
   - Filter by category, shop, and stock status
   - View detailed component information including prices and availability
   - Compare prices across different shops
+  - Find alternative components when items are out of stock
+  - Optimize shopping carts for the best combination of price and availability
 
 - **Parts Lists**
   - Create and manage multiple parts lists
@@ -31,6 +38,13 @@ A modern web application for finding and comparing electronic components across 
   - TanStack Query v5.20 for data fetching
   - React Router v6.22 for navigation
 
+- **Backend**
+  - Node.js with Express
+  - TypeScript for type safety
+  - PostgreSQL database
+  - Prisma ORM
+  - Centralized database on Linode
+
 - **Web Scraping**
   - Puppeteer v22.1 for browser automation
   - Custom scraper framework for vendor-specific implementations
@@ -40,18 +54,38 @@ A modern web application for finding and comparing electronic components across 
 ## Project Structure
 
 ```
-src/
-├── api/              # API client functions
-├── components/       # Reusable React components
-├── lib/             # Core library code
-│   ├── base/        # Base classes
-│   └── scrapers/    # Scraper implementations
-├── pages/           # Page components
-├── types/           # TypeScript interfaces
-├── utils/           # Utility functions
-├── vendors/         # Vendor-specific implementations
-├── App.tsx          # Main application component
-└── main.tsx         # Application entry point
+electronics-component-finder/
+├── src/                      # Source code
+│   ├── api/                  # API client functions
+│   ├── components/           # Reusable React components
+│   ├── controllers/          # Request handlers
+│   ├── lib/                  # Core library code
+│   │   ├── base/            # Base classes
+│   │   └── scrapers/        # Scraper implementations
+│   ├── models/              # Database models
+│   ├── pages/               # Page components
+│   ├── routes/              # API routes
+│   ├── services/            # Business logic
+│   ├── types/               # TypeScript interfaces
+│   ├── utils/               # Utility functions
+│   ├── vendors/             # Vendor-specific implementations
+│   ├── App.tsx              # Main application component
+│   └── main.tsx             # Application entry point
+├── public/                   # Frontend assets
+│   ├── js/                  # Frontend JavaScript
+│   ├── css/                 # Stylesheets
+│   ├── datasheets/         # Stored datasheets
+│   └── index.html          # Main HTML page
+├── scripts/                  # Shell scripts
+│   ├── schema.sql          # Database schema
+│   ├── backup-db.sh        # Database backup script
+│   └── setup-server.sh     # Server setup script
+├── data/                    # Database and other data files
+├── .env                     # Environment variables (API keys, etc.)
+├── .gitignore              # Git ignore file
+├── package.json            # Node.js package configuration
+├── tsconfig.json           # TypeScript configuration
+└── README.md               # Project documentation
 ```
 
 ## Getting Started
@@ -60,13 +94,14 @@ src/
 
 - Node.js 18 or higher
 - npm 9 or higher
+- PostgreSQL 14 or higher
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/electronic-components-finder.git
-   cd electronic-components-finder
+   git clone https://github.com/edwardfalk/electronics-component-finder.git
+   cd electronics-component-finder
    ```
 
 2. Install dependencies:
@@ -76,11 +111,16 @@ src/
 
 3. Configure environment variables:
    ```bash
-   # .env
-   VITE_API_URL=http://localhost:3000
+   cp .env.example .env
+   # Edit .env with your configuration
    ```
 
-4. Start the development server:
+4. Initialize the database:
+   ```bash
+   npm run db:init
+   ```
+
+5. Start the development server:
    ```bash
    npm run dev
    ```
@@ -154,95 +194,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Material-UI](https://mui.com/) for the component library
 - [TanStack Query](https://tanstack.com/query/latest) for data fetching
 - [Vite](https://vitejs.dev/) for the build system
-
-## Scraping Framework Implementation
-
-### Core Classes
-
-#### BaseScraper
-The `BaseScraper` class provides the foundation for all vendor-specific scrapers with the following features:
-- Browser initialization and management using Puppeteer
-- Configurable options for timeouts, viewport, user agent, and proxy settings
-- Page navigation and content extraction utilities
-- Error handling and screenshot capabilities for debugging
-- Rate limiting and retry mechanisms
-
-```typescript
-class BaseScraper {
-  protected browser: Browser | null;
-  protected page: Page | null;
-  
-  // Core methods
-  async initialize(): Promise<void>;
-  async close(): Promise<void>;
-  protected async navigateToPage(url: string): Promise<void>;
-  protected async waitForSelector(selector: string): Promise<void>;
-  protected async extractText(selector: string): Promise<string | null>;
-  protected async extractAttribute(selector: string, attribute: string): Promise<string | null>;
-}
-```
-
-#### BaseVendor
-The `BaseVendor` class defines the interface for vendor implementations with:
-- Standard methods for searching products and checking availability
-- Built-in rate limiting and request throttling
-- Retry mechanisms with exponential backoff
-- Error handling with type categorization
-
-```typescript
-abstract class BaseVendor {
-  abstract search(query: string, options?: SearchOptions): Promise<Component[]>;
-  abstract getPrice(partNumber: string): Promise<ComponentPrice>;
-  abstract checkStock(partNumber: string): Promise<StockInfo>;
-  abstract getDetails(partNumber: string): Promise<Component>;
-  
-  protected async retryOperation<T>(operation: () => Promise<T>): Promise<T>;
-  protected async throttleRequest(): Promise<void>;
-}
-```
-
-### Vendor Implementation Example
-
-The project includes a complete implementation for Electrokit (electrokit.com) that demonstrates:
-- Product search and detail extraction
-- Price and stock information handling
-- Metadata extraction and normalization
-- Error handling and retry logic
-
-```typescript
-export class ElektrokitScraper extends BaseScraper {
-  private readonly searchUrl = 'https://www.electrokit.com/en/search/';
-  
-  async searchProducts(query: string, options?: SearchOptions): Promise<Component[]>;
-  private async scrapeProductDetails(url: string): Promise<Component | null>;
-  private async extractPriceDetails(priceText: string): Promise<ComponentPrice>;
-  private async extractStockInfo(): Promise<StockInfo>;
-}
-```
-
-### Recent Changes and Improvements
-
-1. **Self-Contained Architecture**
-   - Moved core scraping functionality into the project
-   - Eliminated external workspace dependencies
-   - Improved project portability and deployment
-
-2. **Enhanced Error Handling**
-   - Added detailed error types and messages
-   - Implemented retry mechanisms with exponential backoff
-   - Added screenshot capabilities for debugging
-
-3. **Type Safety**
-   - Added comprehensive TypeScript interfaces
-   - Improved type checking for component data
-   - Enhanced IDE support and code completion
-
-4. **Performance Optimizations**
-   - Implemented request throttling
-   - Added configurable timeout settings
-   - Optimized browser resource management
-
-5. **Documentation**
-   - Added detailed implementation examples
-   - Improved code comments and type definitions
-   - Updated setup and contribution guidelines 
